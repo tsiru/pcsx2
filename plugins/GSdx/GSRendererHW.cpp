@@ -660,7 +660,7 @@ void GSRendererHW::Hacks::SetGameCRC(const CRC::Game& game)
 	}
 #if 0
 	// FIXME: Enable this code in the future. I think it could replace
-	// most of the "old" OI hack. So far code was tested on GoW2 with
+	// most of the "old" OI hack. So far code was tested on GoW2 & SimpsonsGame with
 	// success
 	if (m_oi == NULL) {
 		m_oi = &GSRendererHW::OI_DoubleHalfClear;
@@ -672,12 +672,16 @@ bool GSRendererHW::OI_DoubleHalfClear(GSTexture* rt, GSTexture* ds, GSTextureCac
 {
 	if (m_vt.m_primclass == GS_SPRITE_CLASS && !PRIM->TME && !m_context->ZBUF.ZMSK && (m_context->FRAME.FBW >= 7)) {
 		GSVertex* v = &m_vertex.buff[0];
+
+		//GL_INS("OI_DoubleHalfClear: psm:%x. Z:%d R:%d G:%d B:%d A:%d", m_context->FRAME.PSM,
+		//		v[1].XYZ.Z, v[1].RGBAQ.R, v[1].RGBAQ.G, v[1].RGBAQ.B, v[1].RGBAQ.A);
+
 		// Check it is a clear on the first primitive only
 		if (v[1].XYZ.Z || v[1].RGBAQ.R || v[1].RGBAQ.G || v[1].RGBAQ.B || v[1].RGBAQ.A) {
 			return true;
 		}
 		// Only 32 bits format is supported otherwise it is complicated
-		if (!(m_context->FRAME.PSM & 2))
+		if (m_context->FRAME.PSM & 2)
 			return true;
 
 		// FIXME might need some rounding
@@ -698,7 +702,7 @@ bool GSRendererHW::OI_DoubleHalfClear(GSTexture* rt, GSTexture* ds, GSTextureCac
 		}
 
 		if (half <= (base + h_pages * m_context->FRAME.FBW)) {
-			//fprintf(stderr, "%d: base %x half %x. h_pages %d fbw %d\n", s_n, base, half, h_pages, m_context->FRAME.FBW);
+			//GL_INS("OI_DoubleHalfClear: base %x half %x. h_pages %d fbw %d", base, half, h_pages, m_context->FRAME.FBW);
 			if (m_context->FRAME.FBP > m_context->ZBUF.ZBP) {
 				m_dev->ClearDepth(ds, 0);
 			} else {
